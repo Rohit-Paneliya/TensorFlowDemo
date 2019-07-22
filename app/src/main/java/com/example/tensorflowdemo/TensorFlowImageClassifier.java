@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import org.jetbrains.annotations.NotNull;
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedReader;
@@ -41,20 +42,20 @@ public class TensorFlowImageClassifier implements Classifier {
     static Classifier create(AssetManager assetManager,
                              String modelPath,
                              String labelPath,
-                             int inputSize,
-                             boolean quant) throws IOException {
+                             int inputSize) throws IOException {
 
         TensorFlowImageClassifier classifier = new TensorFlowImageClassifier();
         classifier.interpreter = new Interpreter(classifier.loadModelFile(assetManager, modelPath), new Interpreter.Options());
         classifier.labelList = classifier.loadLabelList(assetManager, labelPath);
         classifier.inputSize = inputSize;
-        classifier.quant = quant;
+        classifier.quant = true;
 
         return classifier;
     }
 
+    @NotNull
     @Override
-    public List<Recognition> recognizeImage(Bitmap bitmap) {
+    public List<Recognition> recognizeImage(@NotNull Bitmap bitmap) {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
         if (quant) {
             byte[][] result = new byte[1][labelList.size()];

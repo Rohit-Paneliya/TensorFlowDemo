@@ -13,7 +13,6 @@ class MainActivity : AppCompatActivity() {
     private var classifier: Classifier? = null
 
     private val MODEL_PATH = "mobilenet_quant_v1_224.tflite"
-    private val QUANT = true
     private val LABEL_PATH = "labels.txt"
     private val IMAGE_SIZE = 224
 
@@ -25,6 +24,23 @@ class MainActivity : AppCompatActivity() {
         initTensorFlowAndLoadModel()
 
         btnDetectObject.setOnClickListener { cameraView.captureImage() }
+    }
+
+    private fun initTensorFlowAndLoadModel() {
+
+        Handler().post {
+            try {
+                classifier = TensorFlowImageClassifier.create(
+                    assets,
+                    MODEL_PATH,
+                    LABEL_PATH,
+                    IMAGE_SIZE
+                )
+                makeButtonVisible()
+            } catch (e: Exception) {
+                throw RuntimeException("Error initializing TensorFlow!", e)
+            }
+        }
     }
 
     private fun initCameraView() {
@@ -43,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                 bitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, false)
                 imageViewResult.setImageBitmap(bitmap)
 
+                //Call recognize function.
                 val results = classifier?.recognizeImage(bitmap)
 
                 var item = ""
@@ -57,24 +74,6 @@ class MainActivity : AppCompatActivity() {
 
             }
         })
-    }
-
-    private fun initTensorFlowAndLoadModel() {
-
-        Handler().post {
-            try {
-                classifier = TensorFlowImageClassifier.create(
-                    assets,
-                    MODEL_PATH,
-                    LABEL_PATH,
-                    IMAGE_SIZE,
-                    QUANT
-                )
-                makeButtonVisible()
-            } catch (e: Exception) {
-                throw RuntimeException("Error initializing TensorFlow!", e)
-            }
-        }
     }
 
     private fun makeButtonVisible() {
